@@ -153,7 +153,7 @@ elements of the type `ℕ`. This is overly restrictive, we should have
 an identity function `A → A` that works for any type `A` at all.
 
 ```
-idE : (A : Type) → A → A
+idE : (A : Type) → (A → A)
 idE A x = x
 ```
 
@@ -209,7 +209,8 @@ compose : {A : Type} {B : Type} {C : Type}
     → (A → B)
     → (A → C)
 -- Exercise:
-compose g f = {!!}
+-- compose g f = λ x → g (f x)
+compose g f x =  g (f x)
 ```
 
 Agda considers definitions with underscores specially, and lets us
@@ -226,7 +227,7 @@ flip : {A B C : Type}
      → (A → B → C)
      → (B → A → C)
 -- Exercise:
-flip = {!!}
+flip  f b a = f a b
 
 -- Should use the provided function on the argument twice.
 apply-twice : {A : Type}
@@ -234,7 +235,9 @@ apply-twice : {A : Type}
      → A
      → A
 -- Exercise:
-apply-twice = {!!}
+-- apply-twice f a = a
+apply-twice f a = f (f (a))
+
 ```
 
 * Pen and paper exercise: Check that `f ∘ id` and `id ∘ f` act the
@@ -351,13 +354,13 @@ curry3 : {A B C D : Type}
   → (((A × B) × C) → D)
   → (A → B → C → D)
 -- Exercise:
-curry3 f = {!!}
+curry3 f a b c =  f ((a , b) , c)
 
 uncurry3 : {A B C D : Type}
   → (A → B → C → D)
   → (((A × B) × C) → D)
 -- Exercise:
-uncurry3 f = {!!}
+uncurry3 f p = f (fst (fst p)) (snd (fst p)) (snd p)
 ```
 
 Just as type theory generalises function types to dependent function
@@ -412,7 +415,7 @@ functions `C → A` and `C → B`.
       → (C → B)
       → (C → A × B)
 -- Exercise:
-×-ump = {!!}
+×-ump f g c = (f c) , (g c)
 ```
 
 We will have a lot to say about universal properties in this course.
@@ -436,3 +439,4 @@ idℓ : ∀ {ℓ} {A : Type ℓ} → A → A
 idℓ x = x
 ```
 But we won't need to make use of this for a while.
+ 
