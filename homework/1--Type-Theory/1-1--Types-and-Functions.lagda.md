@@ -1,7 +1,7 @@
 # Homework 1-1: Types and Functions
 
 ```
-module solved-homework.1--Type-Theory.1-1--Types-and-Functions where
+module homework.1--Type-Theory.1-1--Types-and-Functions where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Data.Nat
@@ -153,7 +153,7 @@ elements of the type `ℕ`. This is overly restrictive, we should have
 an identity function `A → A` that works for any type `A` at all.
 
 ```
-idE : (A : Type) → (A → A)
+idE : (A : Type) → A → A
 idE A x = x
 ```
 
@@ -209,8 +209,8 @@ compose : {A : Type} {B : Type} {C : Type}
     → (A → B)
     → (A → C)
 -- Exercise:
--- compose g f = λ x → g (f x)
-compose g f x =  g (f x)
+-- compose g f = {!!}
+compose g f = λ x → g {!    !}
 ```
 
 Agda considers definitions with underscores specially, and lets us
@@ -227,7 +227,7 @@ flip : {A B C : Type}
      → (A → B → C)
      → (B → A → C)
 -- Exercise:
-flip  f b a = f a b
+flip = {!!}
 
 -- Should use the provided function on the argument twice.
 apply-twice : {A : Type}
@@ -235,9 +235,7 @@ apply-twice : {A : Type}
      → A
      → A
 -- Exercise:
--- apply-twice f a = a
-apply-twice f a = f (f (a))
-
+apply-twice = {!!}
 ```
 
 * Pen and paper exercise: Check that `f ∘ id` and `id ∘ f` act the
@@ -354,13 +352,13 @@ curry3 : {A B C D : Type}
   → (((A × B) × C) → D)
   → (A → B → C → D)
 -- Exercise:
-curry3 f a b c =  f ((a , b) , c)
+curry3 f = {!!}
 
 uncurry3 : {A B C D : Type}
   → (A → B → C → D)
   → (((A × B) × C) → D)
 -- Exercise:
-uncurry3 f p = f (fst (fst p)) (snd (fst p)) (snd p)
+uncurry3 f = {!!}
 ```
 
 Just as type theory generalises function types to dependent function
@@ -396,13 +394,13 @@ uncurry : {A : Type} → {B : A → Type} → {C : (x : A) → B x → Type}
   → ((x : A) → (y : B x) → C x y)
   → (p : Σ[ x ∈ A ] B x) → C (fst p) (snd p)
 -- Exercise
-uncurry f p = f (fst p) (snd p)
+uncurry f p = {!!}
 
 curry : {A : Type} → {B : A → Type} → {C : (x : A) → B x → Type}
   → ((p : Σ[ x ∈ A ] B x) → C (fst p) (snd p))
   → (x : A) → (y : B x) → C x y
 -- Exercise
-curry f x y = f (x , y)
+curry f x y = {!!}
 ```
 
 Finally in this section, we have the "universal mapping property" of
@@ -415,7 +413,7 @@ functions `C → A` and `C → B`.
       → (C → B)
       → (C → A × B)
 -- Exercise:
-×-ump f g c = (f c) , (g c)
+×-ump = {!!}
 ```
 
 We will have a lot to say about universal properties in this course.
@@ -439,4 +437,3 @@ idℓ : ∀ {ℓ} {A : Type ℓ} → A → A
 idℓ x = x
 ```
 But we won't need to make use of this for a while.
- 
