@@ -144,7 +144,12 @@ suc n ≤ suc m = n ≤ m
 
 take : (n : ℕ) (L : List A) → BooleanPartial (n ≤ length L) (List A)
 -- Exercise
-take n L = {!!}
+take zero [] = just []
+take (suc n) [] = nothing
+take zero (x :: L) = just []
+take (suc n) (x :: L) = (x ::_) ∘ take n L
+-- take zero [] = {!   !}
+-- take zero (x :: L) = {!   !}
 ```
 
 ## Partial elements
@@ -262,7 +267,7 @@ Try it yourself: describe a formula which gives the two sides of a box
 ```
 sides-of-square : I → I → I
 -- Exercise
-sides-of-square i j = {!!}
+sides-of-square i j = ~ i ∨ i
 ```
 
 How about a three dimensional example. Come up with a formula to
@@ -287,7 +292,7 @@ of the sides.
 ```
 exercise-shape : I → I → I → I
 -- Exercise
-exercise-shape i j k = {!!}
+exercise-shape i j k = (~ k) ∨ (~ j ) ∨ (~ i) ∨ i ---{! ~ (k ∧ j ∧ ~ i) !}
 ```
 
 ## Extensibility and Composition
@@ -455,6 +460,11 @@ is a function `I → A` about which we know that `p i0 = x` and
 `p i1 = y`. Using extension types, we could write this as
 
 ```
+
+endpoints : ∀ { A : Type ℓ} (x y : A) → (i : I ) → Partial ( ∂ i ) A 
+endpoints x y i (i = i0) = x
+endpoints x y i (i = i1) = y
+
 Path-ish : ∀ {A} (endpoints : (i : I) → Partial (∂ i) A) → SSet
 Path-ish {A} endpoints = (i : I) → A [ ∂ i ↦ endpoints i ]
 ```
@@ -616,13 +626,13 @@ one.)
 ```
 diamondFaces : {x y z : A} (p : x ≡ y) (q : y ≡ z) → (i : I) → (j : I) → I → Partial (∂ i ∨ ∂ j) A
 -- Exercise
-diamondFaces p q i j k (i = i0) = {!!}
-diamondFaces p q i j k (i = i1) = {!!}
-diamondFaces p q i j k (j = i0) = {!!}
-diamondFaces p q i j k (j = i1) = {!!}
+diamondFaces p q i j k (i = i0) = p j
+diamondFaces p q i j k (i = i1) = q (k ∧ j)
+diamondFaces p q i j k (j = i0) = p i
+diamondFaces p q i j k (j = i1) = q (k ∧ i)
 
 -- Exercise
-diamond p q i j = hcomp (diamondFaces p q i j) {!!}
+diamond p q i j = hcomp (diamondFaces p q i j)  (p (i ∨ j))
 ```
 
 This is not the only way to do it! The composition problems that
@@ -649,13 +659,13 @@ same `diamond` square, but using the following cube:
 ```
 diamondFacesAlt : {x y z : A} (p : x ≡ y) (q : y ≡ z) → (i : I) → (j : I) → I → Partial (∂ i ∨ ∂ j) A
 -- Exercise
-diamondFacesAlt p q i j k (i = i0) = {!!}
-diamondFacesAlt p q i j k (i = i1) = {!!}
-diamondFacesAlt p q i j k (j = i0) = {!!}
-diamondFacesAlt p q i j k (j = i1) = {!!}
+diamondFacesAlt p q i j k (i = i0) = p (j ∧ k)
+diamondFacesAlt p q i j k (i = i1) = compPath-filler p q j k
+diamondFacesAlt p q i j k (j = i0) = p (i ∧ k)
+diamondFacesAlt p q i j k (j = i1) = compPath-filler p q i k
 
-diamondAlt : (p : x ≡ y) (q : y ≡ z) → Square p q p q
-diamondAlt {x = x} p q i j = {!!}
+diamondAlt : (p : x ≡ y) (q : y ≡ z) → Square p q p q 
+diamondAlt {x = x} p q i j = hcomp (diamondFacesAlt p q i j) x
 ```
 
 Let's set about proving associativity for path composition. To prove
@@ -682,14 +692,15 @@ cube whose top face is the path-between-paths that we want.
 ```
 assoc-faces : {w x y z : A} (r : w ≡ x) (p : x ≡ y) (q : y ≡ z) → (i : I) → (j : I) → (k : I) → Partial (∂ i ∨ ∂ j) A
 -- Exercise
-assoc-faces         r p q i j k (i = i0) = {!!}
-assoc-faces         r p q i j k (i = i1) = {!!}
-assoc-faces {w = w} r p q i j k (j = i0) = {!!}
-assoc-faces         r p q i j k (j = i1) = {!!}
+assoc-faces         r p q i j k (i = i0) = (r ∙ (compPath-filler p q k )) j
+assoc-faces         r p q i j k (i = i1) = compPath-filler (r ∙  p) q  k j
+assoc-faces {w = w} r p q i j k (j = i0) = w
+assoc-faces         r p q i j k (j = i1) = q k 
+
 
 assoc-base : {w x y z : A} (r : w ≡ x) (p : x ≡ y) (q : y ≡ z) → Square (r ∙ p) (r ∙ p) refl refl
 -- Exercise
-assoc-base r p q i j = {!!}
+assoc-base r p q i j = (r ∙ p) j
 
 assoc : (r : w ≡ x) (p : x ≡ y) (q : y ≡ z)
   → r ∙ (p ∙ q) ≡ (r ∙ p) ∙ q
@@ -731,18 +742,22 @@ To cancel on the left we have to build another cube.
                 refl
 
 The faces are straightforward to construct if you stare at the diagram.
-Rather nicely, `hcomps` are *uniform*. That means that if we do an `hcomp` on some shape and then restrict to a subshape, the result is the same as restricting and doing the `hcomp` there. In the above cube, since the `i = i1` face is exactly the square from the `hcomp` defining `refl ∙ p`, we can omit it from our final `hcomp`.
+Rather nicely, `hcomps` are *uniform*. That means that if we do an `hcomp`
+on some shape and then restrict to a subshape, the result is the same as
+restricting and doing the `hcomp` there. In the above cube, since the
+`i = i1` face is exactly the square from the `hcomp` defining `refl ∙ p`,
+we can omit it from our final `hcomp`.
 ```
 lUnit-faces : {x y : A} (p : x ≡ y) → (i : I) → (j : I) → (k : I) → Partial (~ i ∨ ∂ j) A
-lUnit-faces         p i j k (i = i0) = {!!} -- Constant in the `j` direction
+lUnit-faces         p i j k (i = i0) = p j -- Constant in the `k` direction
 -- We can omit the (i = i1) direction, since it will be filled in
 -- by the appropriate value
-lUnit-faces {x = x} p i j k (j = i0) = {!!} -- Completely constant
-lUnit-faces         p i j k (j = i1) = {!!} -- Constructed from `p` using connections
+lUnit-faces {x = x} p i j k (j = i0) = x -- Completely constant
+lUnit-faces         p i j k (j = i1) = p (k ∨ (~ i)) -- Constructed from `p` using connections
 
 lUnit-base : {x y : A} (p : x ≡ y) → Square p refl refl (sym p)
 -- Hint: Constructed from `p` using connections in a different way
-lUnit-base p i j = {!!}
+lUnit-base p i j = p (j ∧ (~ i))
 
 lUnit : (p : x ≡ y) → p ≡ refl ∙ p
 lUnit {x = x} p i j = hcomp (lUnit-faces p i j) (lUnit-base p i j)
@@ -750,9 +765,27 @@ lUnit {x = x} p i j = hcomp (lUnit-faces p i j) (lUnit-base p i j)
 
 Here's an open ended problem that requires using two `hcomps`. Try and figure out what boxes you should try and close off to solve it.
 
+
+
+    a        b
+    ^         ^
+    |         |          ^
+    |         |        j |
+    . — — — > .           ∙ — >
+    co         b            i
 ```
 isContrisContr≡ : {A : Type ℓ} (c : isContr A) (a b : A) → isContr (a ≡ b)
 -- Hint: You should use an `hcomp` for both halves. Draw them out!
 -- Hint 2: In the second component, you only need three sides of a cube.
-isContrisContr≡ (c₀ , c) a b = {!!} , {!!}
+-- isContrisContr≡ (c₀ , c) a b = hcomp {!   !} {!   !} , hcomp {!   !} {!   !}
+fst (isContrisContr≡ (c₀ , c) a b) i = 
+  hcomp (( λ {j (i = i0 ) → (c a j ) 
+  ; j (i = i1) → c b j })) 
+  (c₀)
+snd (isContrisContr≡ (c₀ , c) a b) p i j = 
+  hcomp (λ { k (i = i1) → c (p j) k  
+  ; k (j = i0) → c a k  
+  ; k (j = i1) → c b k})  
+  c₀
+
 ```
