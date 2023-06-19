@@ -4,10 +4,11 @@ module solved-homework.2--Paths-and-Identifications.2-5--Propositions where
 
 open import Cubical.Data.Sigma.Base using (Σ ; _×_)
 
-open import solved-homework.1--Type-Theory.1-1--Types-and-Functions
+
+open import solved-homework.1--Type-Theory.1-1--Types-and-Functions  ---circ
 open import solved-homework.1--Type-Theory.1-2--Inductive-Types
 open import solved-homework.1--Type-Theory.1-3--Propositions-as-Types hiding (¬_)
-open import solved-homework.2--Paths-and-Identifications.2-1--Paths
+open import solved-homework.2--Paths-and-Identifications.2-1--Paths 
 open import solved-homework.2--Paths-and-Identifications.2-2--Path-Algebra-and-J
 open import solved-homework.Library.Univalence
 open import solved-homework.2--Paths-and-Identifications.2-4--Composition-and-Filling
@@ -44,6 +45,11 @@ private
     x ≡⟨ q ⟩
     y ≡⟨ r ⟩
     z ∎
+
+    -- p is a path from w to x and q is a path from x to y, so we can
+    -- chain them together to get a path from w to y.
+    -- w ≡⟨ p ⟩ x ≡⟨ q ⟩ y
+
 
   example2 : (f : A → B) (g : B → A)
            → (η : (x : A) → x ≡ g (f x))
@@ -140,7 +146,7 @@ has an element, then it is contractible.
 ```
 Prop-with-point-isContr : isProp A → A → isContr A
 -- Exercise:
-Prop-with-point-isContr p a = {!!}
+Prop-with-point-isContr p a = a , (p a )
 ```
 
 We can go the other way too. If, whenever `A` has an element, it has a
@@ -149,8 +155,15 @@ unique element, then it has at most one element.
 ```
 isContr-prop-with-point : (A → isContr A) → isProp A
 -- Exercise:
-isContr-prop-with-point c x y = {!!}
-```
+isContr-prop-with-point c x y = 
+  let c₀ = fst (c x)  -- ? No need for type signature (which is needed for 'where')
+      contract = snd (c x)
+  in
+    x ≡⟨ sym (contract x) ⟩ 
+    c₀ ≡⟨ contract y ⟩ 
+    y ∎
+                           
+``` 
 
 More interestingly, we can show that being contractible is a
 proposition. That is, `isContr A` is a proposition for any type `A`:
@@ -179,7 +192,7 @@ the following cube:
           /     | h0 y        /  y  |
        c0 - - - - - - - - > y       |
         ^       |           ^       | h0 y               ^   j
-        |       |           |       |                  k | /
+        |       |h0 c1      |       |                  k | /
         |       |           |       |                    ∙ — >
         |       |           |       |                      i
         |      c0 - - - - - | - - > c0
@@ -228,7 +241,7 @@ isProp→SquareP {A = A} isPropB {a = a} r s t u i j =
            ; k (j = i1) → isPropB i i1 (base i i1) (s i) k
         }) (base i j) where
     base : (i j : I) → A i j
-    base i j = {!!}
+    base i j = transport (λ k → A  (k ∧ i) (k ∧ j) ) a
 
 isPropIsProp : isProp (isProp A)
 isPropIsProp isProp1 isProp2 i a b = isProp→SquareP (λ _ _ → isProp1) refl refl (isProp1 a b) (isProp2 a b) i
@@ -248,7 +261,7 @@ isPropFun : {A : Type ℓ} {B : A → Type ℓ'}
             (p : ∀ a → isProp (B a))
           → isProp (∀ a → B a)
 -- Exercise
-isPropFun p f g = {!!}
+isPropFun p f g i a = p a (f a) (g a) i
 ```
 
 As a special case of "for all", we get "implies". If `A` and `B` are
@@ -320,12 +333,16 @@ some sense `A` is a continuous shrinking of `B`. And so if `B` is a
 proposition, then `A` must be too:
 
 ```
+
 isPropRetract :
   (f : A → B) (g : B → A)
   → (h : retract f g)
   → isProp B → isProp A
 -- Exercise
-isPropRetract f g h isPropB x y i = {!!}
+isPropRetract f g h isPropB x y i = 
+  hcomp (λ { j (i = i0) → h x j 
+           ; j (i = i1) → h y j }) 
+        (cong g (isPropB (f x) (f y)) i)
 ```
 
 And similarly for contractible types:
@@ -335,8 +352,16 @@ isContrRetract :
   → (h : retract f g)
   → isContr B → isContr A
 -- Exercise
-fst (isContrRetract f g h (center , contr)) = {!!}
-snd (isContrRetract f g h (center , contr)) x = {!!}
+fst (isContrRetract f g h (center , contr)) = g center
+-- snd (isContrRetract f g h (center , contr)) x i =
+--   hcomp (λ { j (i = i0) → g center 
+--            ; j (i = i1) → h x j }) 
+--         (g (contr (f x) i))
+-- ? Solution in class
+snd (isContrRetract f g h (center , contr)) x = 
+  g center ≡⟨ cong g (contr (f x)) ⟩
+  g (f x) ≡⟨ h x ⟩
+  x ∎
 ```
 
 ## Propositional Truncation
@@ -408,7 +433,7 @@ When `P` is already a proposition, truncating it should do nothing:
 ```
 isProp→equiv∃ : isProp P → Iso P (∃ P)
 -- Exercise
-isProp→equiv∃ isPropP = ?
+isProp→equiv∃ isPropP = {!   !}
 ```
 
 If `P : A → Type` is a family of propositions on `A` --- that is, a
@@ -689,3 +714,4 @@ isPropΣ : {A : Type ℓ} {B : A → Type ℓ'}
 isPropΣ q p (a1 , b1) (a2 , b2) i =
   q a1 a2 i , ∀isProp→isPred p a1 a2 (q a1 a2) b1 b2 i
 ```
+ 
