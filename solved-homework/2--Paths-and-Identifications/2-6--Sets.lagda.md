@@ -4,6 +4,8 @@ module solved-homework.2--Paths-and-Identifications.2-6--Sets where
 
 open import Cubical.Data.Sigma.Base using (Σ ; _×_)
 open import Cubical.Foundations.Function using (_∘_; _$_)
+
+
 open import solved-homework.1--Type-Theory.1-1--Types-and-Functions hiding (_∘_)
 open import solved-homework.1--Type-Theory.1-2--Inductive-Types
 open import solved-homework.1--Type-Theory.1-3--Propositions-as-Types hiding (¬_)

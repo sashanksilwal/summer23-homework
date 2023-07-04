@@ -2,8 +2,8 @@ module solved-homework.Library.EquationalReasoning where
 
 open import Cubical.Core.Primitives
 
-open import solved-homework.2--Paths-and-Identifications.2-1--Paths
-open import solved-homework.2--Paths-and-Identifications.2-4--Composition-and-Filling
+open import homework-solutions.2--Paths-and-Identifications.2-1--Paths
+open import homework-solutions.2--Paths-and-Identifications.2-4--Composition-and-Filling
 
 private
   variable
